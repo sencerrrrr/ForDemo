@@ -31,7 +31,7 @@ def home_view(request):
             ).count(),
         },
     }
-    return render(request, 'conference/home.html')
+    return render(request, 'conference/home.html', context)
 
 
 def login_view(request):

@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="mb-4">
+            <h3>Панель администратора</h3>
+        </div>
+        <div class="row g-3 mb-4 text-center">
+            <div class="col-sm-6 col-xl-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h3 class="mb-1">{{ page_obj.paginator.count }}</h2>
+                        <p class="small text-muted mb-0">заявок</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h3 class="mb-1">{{ status_summary.new|default:0 }}</h2>
+                        <p class="small text-muted mb-0">новых</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h3 class="mb-1">{{ status_summary.scheduled|default:0 }}</h2>
+                        <p class="small text-muted mb-0">назначено</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h3 class="mb-1">{{ status_summary.completed|default:0 }}</h2>
+                        <p class="small text-muted mb-0">завершено</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-center">
+                    <form method="get" class="d-flex flex-column flex-md-row gap-2 flex-grow-1">
+                        <input type="search" name="q" value="{{ current_filters.q }}" class="form-control" placeholder="Поиск по заявкам, пользователю или залу">
+                        <button type="submit" id="buttong" class="btn">Найти</button>
+                    </form>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#filterModal">Фильтры</button>
+                        <a href="{% url 'admin_requests' %}" class="btn btn-outline-secondary">Сбросить</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="filterModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div>
+                            <h2 class="h5 mb-1">Фильтры заявок</h2>
+                            <p class="text-muted small mb-0">Выберите нужные параметры.</p>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="get">
+                            <div class="mb-3">
+                                <label for="q" class="form-label">Поиск</label>
+                                <input id="q" type="search" name="q" value="{{ current_filters.q }}" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label for="status" class="form-label">Статус</label>
+                                <select id="status" name="status" class="form-select">
+                                    <option value="">Все статусы</option>
+                                    {% for value, label in status_choices %}
+                                        <option value="{{ value }}" {% if current_filters.status == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="payment" class="form-label">Оплата</label>
+                                <select id="payment" name="payment" class="form-select">
+                                    <option value="">Все способы</option>
+                                    {% for value, label in payment_choices %}
+                                        <option value="{{ value }}" {% if current_filters.payment == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="date_from" class="form-label">Дата от</label>
+                                    <input id="date_from" type="date" name="date_from" value="{{ current_filters.date_from }}" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="date_to" class="form-label">Дата до</label>
+                                    <input id="date_to" type="date" name="date_to" value="{{ current_filters.date_to }}" class="form-control">
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="ordering" class="form-label">Сортировка</label>
+                                <select id="ordering" name="ordering" class="form-select">
+                                    <option value="-created_at" {% if current_filters.ordering == '-created_at' %}selected{% endif %}>Сначала новые заявки</option>
+                                    <option value="created_at" {% if current_filters.ordering == 'created_at' %}selected{% endif %}>Сначала старые заявки</option>
+                                    <option value="event_date" {% if current_filters.ordering == 'event_date' %}selected{% endif %}>Дата по возрастанию</option>
+                                    <option value="-event_date" {% if current_filters.ordering == '-event_date' %}selected{% endif %}>Дата по убыванию</option>
+                                    <option value="status" {% if current_filters.ordering == 'status' %}selected{% endif %}>По статусу</option>
+                                </select>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="submit" class="btn btn-primary">Применить</button>
+                                <a href="{% url 'admin_requests' %}" class="btn btn-outline-secondary">Очистить</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                {% if booking_requests %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Мероприятие</th>
+                                    <th>Пользователь</th>
+                                    <th>Помещение</th>
+                                    <th>Дата</th>
+                                    <th>Время</th>
+                                    <th>Оплата</th>
+                                    <th>Статус</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking_request in booking_requests %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ booking_request.conference_title }}</strong>
+                                            <div class="small text-muted">{{ booking_request.attendees }} участников</div>
+                                        </td>
+                                        <td>
+                                            <strong>{{ booking_request.user.full_name }}</strong>
+                                            <div class="small text-muted">{{ booking_request.user.username }}</div>
+                                        </td>
+                                        <td>{{ booking_request.venue.name }}</td>
+                                        <td>{{ booking_request.event_date|date:'d.m.Y' }}</td>
+                                        <td>{{ booking_request.preferred_time|time:'H:i' }}</td>
+                                        <td>{{ booking_request.get_payment_method_display }}</td>
+                                        <td><span class="{{ booking_request.status_badge_class }}">{{ booking_request.get_status_display }}</span></td>
+                                        <td class="text-end">
+                                            <a href="{% url 'admin_request_detail' booking_request.pk %}" id="buttong" class="btn btn-sm">Открыть</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if is_paginated %}
+                        <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 p-3">
+                            {% if page_obj.has_previous %}
+                                <form method="get" class="m-0">
+                                    <input type="hidden" name="q" value="{{ current_filters.q }}">
+                                    <input type="hidden" name="status" value="{{ current_filters.status }}">
+                                    <input type="hidden" name="payment" value="{{ current_filters.payment }}">
+                                    <input type="hidden" name="date_from" value="{{ current_filters.date_from }}">
+                                    <input type="hidden" name="date_to" value="{{ current_filters.date_to }}">
+                                    <input type="hidden" name="ordering" value="{{ current_filters.ordering }}">
+                                    <input type="hidden" name="page" value="{{ page_obj.previous_page_number }}">
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm">Назад</button>
+                                </form>
+                            {% endif %}
+                            <span class="small text-muted">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                            {% if page_obj.has_next %}
+                                <form method="get" class="m-0">
+                                    <input type="hidden" name="q" value="{{ current_filters.q }}">
+                                    <input type="hidden" name="status" value="{{ current_filters.status }}">
+                                    <input type="hidden" name="payment" value="{{ current_filters.payment }}">
+                                    <input type="hidden" name="date_from" value="{{ current_filters.date_from }}">
+                                    <input type="hidden" name="date_to" value="{{ current_filters.date_to }}">
+                                    <input type="hidden" name="ordering" value="{{ current_filters.ordering }}">
+                                    <input type="hidden" name="page" value="{{ page_obj.next_page_number }}">
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm">Вперёд</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="p-4">
+                        <div class="alert alert-secondary mb-0">По этим условиям заявок не найдено.</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

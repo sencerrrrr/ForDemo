@@ -41,10 +41,10 @@ class RegistrationForm(forms.ModelForm):
             'phone': 'Например: +79991234567',
         }
         widgets = {
-            'username': forms.TextInput(attrs={'placeholder': 'conference24'}),
+            'username': forms.TextInput(attrs={'placeholder': 'Ivan'}),
             'full_name': forms.TextInput(attrs={'placeholder': 'Иванов Иван Иванович'}),
             'phone': forms.TextInput(attrs={'placeholder': '+79991234567'}),
-            'email': forms.EmailInput(attrs={'placeholder': 'mail@example.com'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'ivan@mail.ru'}),
         }
 
     def __init__(self, *args, **kwargs):

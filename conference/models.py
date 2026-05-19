@@ -181,9 +181,9 @@ class Review(models.Model):
         verbose_name='Заявка',
     )
     user = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
-        related_name='reviews', 
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews',
         verbose_name='Автор'
         )
     rating = models.PositiveSmallIntegerField(
